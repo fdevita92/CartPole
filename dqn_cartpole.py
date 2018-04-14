@@ -7,6 +7,7 @@ from keras.optimizers import Adam
 import h5py
 import os
 import sys
+import glob
 
 cd = os.getcwd()
 
@@ -31,7 +32,7 @@ memory_size = 2000
 batch_size = 32
 discount_factor = 1
 
-
+search_for_best_model = False
 
 def neural_network_model(input_size,output_size,learning_rate):
 
@@ -57,16 +58,18 @@ def load_model(model,fname):
 main_dqn = neural_network_model(input_size,output_size,learning_rate)
 target_dqn = neural_network_model(input_size,output_size,learning_rate)
 
-if os.path.exists(cd+"/model/cartpole-900.h5"):
+if os.path.exists(cd+"/model/cartpole-1000.h5") and sys.argv[1] == "test":
 	print("Weights loaded successfully !")
-	main_dqn = load_model(main_dqn,"model/cartpole-900.h5")
+	main_dqn = load_model(main_dqn,"model/cartpole-1000.h5")
 target_dqn.set_weights(main_dqn.get_weights())
 
 scores = []
+totals = []
+
 
 if sys.argv[1] == "train":
 
-	for episode in range(n_of_episodes):
+	for episode in range(1,n_of_episodes+1):
 		current_state = env.reset()
 		episode_score = 0
 		for steps in range(n_of_steps):
@@ -108,26 +111,52 @@ if sys.argv[1] == "train":
 			save_model(main_dqn,"model/cartpole-"+str(episode)+".h5")
 		print ("Episode {}/{} completed, episode score {}, exploration_prob {:2f}".format(episode,n_of_episodes,episode_score,exploration_prob))
 
+	print("Training finished !")
+	if search_for_best_model:
+		print("Searching for the best model...")
+		dqn = neural_network_model(input_size,output_size,learning_rate)
+		models=glob.glob("model/*")
+		for i in range(len(models)):
+			dqn = load_model(dqn,models[i])
+			for episode in range(11):
+				current_state = env.reset()
+				episode_score = 0
+				for steps in range(n_of_steps):
+					action = np.argmax(dqn.predict(np.array([current_state]))[0])
+					next_state,reward,done,info = env.step(action)
+					if done:
+						break
+					current_state = next_state
+					episode_score += reward
+				scores.append(episode_score)
+			totals.append(np.mean(scores))
+			scores = []
+
+		best_model = np.argmax(totals)
+		print("The best model is: "+ models[best_model])
+
+
 elif sys.argv[1] == "test":
 
 	for episode in range(n_of_episodes):
 		current_state = env.reset()
 		episode_score = 0 
 		for steps in range(n_of_steps):
-			env.render()
+			if n_of_episodes <= 20:
+				env.render()
 			action = np.argmax(main_dqn.predict(np.array([current_state]))[0])
-			print("Action: ",action)
+			#print("Action: ",action)
 			next_state,reward,done,info = env.step(action)
 			if done:
 				break
 			current_state = next_state
 			episode_score += reward
 		scores.append(episode_score)
-		print("Episode {}/{} completed, episode_score {}".format(episode,n_of_episodes,episode_score))
+		print("Episode {}/{} completed, episode_score {}".format(episode+1,n_of_episodes,episode_score))
 
-print("Mean: ",np.mean(scores))
-print("Max:" ,np.max(scores))
-print("Min:",np.min(scores))
+	print("Mean: ",np.mean(scores))
+	print("Max:" ,np.max(scores))
+	print("Min:",np.min(scores))
 
 
 env.close()
