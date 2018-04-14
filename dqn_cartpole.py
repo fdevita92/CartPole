@@ -21,7 +21,7 @@ learning_rate = 0.001
 n_hidden = 20
 
 # Environment parameters
-n_of_episodes = 10
+n_of_episodes = 1000
 n_of_steps = 1000
 steps_executed = 0
 starting_epsilon = 1.0
