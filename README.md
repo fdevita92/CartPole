@@ -8,7 +8,7 @@ The DQN is trained for 1000 episodes, but you can edit this parameter by changin
 To test the system just type: python3 dqn_cartpole.py test (I suggest you to load the best weights provided by the script during train mode for best performances). Note: the environment will render only if the number of testing episodes will be less or equal 20 (you can change this setting if you want)
 
 # Best Model
-The script can be run in a third mode called best. After training, by running this mode the script will search for the best model among the files saved inside the model directory (this may take a lot of time, so be patient). It will test every model for 10 episodes and it will return the best one with the highest score (on average). 
+The script can be run in a third mode called "best". After training, by running this mode the script will search for the best model among the files saved inside the model directory (this may take a lot of time, so be patient). It will test every model for 10 episodes and it will return the best one with the highest score (on average). 
 
 # Main Dependencies
 1. Tensorflow
