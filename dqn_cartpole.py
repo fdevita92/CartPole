@@ -111,29 +111,7 @@ if sys.argv[1] == "train":
 		print ("Episode {}/{} completed, episode score {}, exploration_prob {:2f}".format(episode,n_of_episodes,episode_score,exploration_prob))
 
 	print("Training finished !")
-		print("Searching for the best model...")
-		dqn = neural_network_model(input_size,output_size,learning_rate)
-		models=glob.glob("model/*")
-		for i in range(len(models)):
-			dqn = load_model(dqn,models[i])
-			for episode in range(11):
-				current_state = env.reset()
-				episode_score = 0
-				for steps in range(n_of_steps):
-					action = np.argmax(dqn.predict(np.array([current_state]))[0])
-					next_state,reward,done,info = env.step(action)
-					if done:
-						break
-					current_state = next_state
-					episode_score += reward
-				scores.append(episode_score)
-			totals.append(np.mean(scores))
-			scores = []
-
-		best_model = np.argmax(totals)
-		print("The best model is: "+ models[best_model])
-
-
+		
 elif sys.argv[1] == "test":
 
 	for episode in range(n_of_episodes):
